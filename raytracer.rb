@@ -1,6 +1,18 @@
 require 'matrix'
 
+require 'ppm_image'
+require 'objects'
+
 EPS = 1e-9
+
+class Light
+  attr_reader :intensity, :origin
+
+  def initialize(origin, intensity = 100)
+    @origin = origin
+    @intensity = intensity
+  end
+end
 
 class Camera
   def initialize(position, direction, focale = 45)
@@ -17,67 +29,81 @@ class Ray
   end
 end
 
-class AbstractObject
-  attr_reader :center
+class Intersection
+  attr_reader :object, :distance, :point
 
-  def initialize(center)
-    @center = center
-  end
-end
-
-class Sphere < AbstractObject
-  attr_reader :radius, :color
-
-  def initialize(center, radius, color)
-    super(center)
-    @radius = radius
-    @color = color
-  end
-
-  def distance_to_intersection_with(ray)
-    radical = ray.direction.dot(ray.origin - center)**2 -
-              (ray.origin - center).norm**2 +
-              radius**2
-    return nil if radical < -EPS
-
-    distance = -ray.direction.dot(ray.origin - center)
-    return distance if radical.abs < EPS
-    distance - Math.sqrt(radical)
+  def initialize(ray, object, distance)
+    @ray = ray
+    @object = object
+    @distance = distance
+    @point = ray.direction * distance
   end
 end
 
 class World
-  attr_reader :objects
+  attr_reader :objects, :lights, :height, :width, :image
 
-  def initialize
+  def initialize(h, w)
+    @height = h
+    @width = w
     @objects = []
+    @lights = []
+    @image = PPMImage.new(h, w)
   end
 
   def add(object)
     objects << object
   end
 
-  def render
-    h = w = 250
-    image = PPMImage.new(h, w)
-    (0..w).each do |x|
-      (0..h).each do |y|
-        ray_x = (2 * (x + 0.5) / w) - 1
-        ray_y = 1 - 2 * (y + 0.5) / h
-        r = Ray.new(Vector[0, 0, 0], Vector[ray_x, ray_y, 1].normalize)
+  def add_light(light)
+    lights << light
+  end
 
-        qwe = Hash[
-          objects.map do |object|
-            [object, object.distance_to_intersection_with(r)]
-          end
-        ].reject { |k, v| v.nil? }
-        color = if qwe.empty?
+  def first_intersection(ray)
+    objects.map do |object|
+      distance = object.distance_to_intersection_with(ray)
+      Intersection.new(ray, object, distance) if distance
+    end.compact.min_by(&:distance)
+  end
+
+  def light_intersection(light, point)
+    light_direction = point - light.origin
+    light_ray = Ray.new(light.origin, light_direction)
+    first_intersection(light_ray)
+  end
+
+  def apply_light_to_color(light, distance, color)
+    color.map do |c|
+      [(c * light.intensity / distance**2).round, 255].min
+    end
+  end
+
+  def render_pixel(x, y)
+    ray_x = (2 * (x + 0.5) / width) - 1 # TODO: more rays per pixel
+    ray_y = 1 - 2 * (y + 0.5) / height
+    r = Ray.new(Vector[0, 0, 0], Vector[ray_x, ray_y, 1])
+    color = [0, 0, 0]
+
+    intersection = first_intersection(r)
+    unless intersection.nil?
+      color = intersection.object.color
+      lights.each do |light|
+        light_intersection = light_intersection(light, intersection.point)
+        color = if light_intersection.object != intersection.object
                   [0,0,0]
                 else
-                  obj = qwe.min_by { |_, v| v }[0]
-                  obj.color
+                  apply_light_to_color(light, light_intersection.distance, color)
                 end
-        image.set(x, y, color)
+      end
+    end
+    image.set(x, y, color)
+  end
+
+  def render
+    h = w = 250
+    (0..w).each do |x|
+      (0..h).each do |y|
+        render_pixel(x, y)
       end
     end
     image.write('test.ppm')
@@ -92,44 +118,21 @@ end
 #     @normal = normal.normalize
 #   end
 
-#   def intersections_with(ray)
+#   def intersection_with(ray)
 
 #   end
 # end
 
-class PPMImage
-  attr_reader :height, :width
 
-  def initialize(h, w)
-    @height = h
-    @width = w
-    @data = [[0,0,0]] * h * w
-  end
-
-  def index_at_point(x, y)
-    x + (y * width)
-  end
-
-  def set(x, y, color)
-    @data[index_at_point(x, y)] = color
-  end
-
-  def write(file_name)
-    File.open(file_name, 'w') do |file|
-      file.write("P3\n")
-      file.write("# test\n")
-      file.write("#{width} #{height}\n")
-      file.write("255\n")
-      @data.each_with_index do |pixel, idx|
-        file.write("#{pixel[0]} #{pixel[1]} #{pixel[2]} ")
-      end
-    end
-  end
-end
-
-s  = Sphere.new(Vector[0, 5, 6], 3, [0, 234, 32])
-s1 = Sphere.new(Vector[0, 2, 7], 2, [111, 2, 23])
-w = World.new
+s  = Sphere.new(Vector[0, 1, 10], 4, [0, 234, 32])
+s1 = Sphere.new(Vector[-2, 1, 4], 1, [111, 2, 23])
+s2 = Sphere.new(Vector[2, -1, 4], 1.5, [42, 25, 255])
+l = Light.new(Vector[-8, 0, -1], 30)
+#l2 = Light.new(Vector[0,0,0], 1e-3)
+w = World.new(250, 250)
 w.add(s)
 w.add(s1)
+w.add(s2)
+w.add_light(l)
+#w.add_light(l2)
 w.render
