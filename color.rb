@@ -1,4 +1,5 @@
 class Color
+
   attr_reader :r, :g, :b
 
   def initialize(r, g, b)
@@ -28,4 +29,7 @@ class Color
   def round
     Color.new(*(to_a.map(&:round)))
   end
+
+  WHITE = Color.new(255, 255, 255).freeze
+  BLACK = Color.new(0, 0, 0).freeze
 end
