@@ -4,7 +4,7 @@ class PPMImage
   def initialize(h, w)
     @height = h
     @width = w
-    @data = [[0,0,0]] * h * w
+    @data = [Color.new(0,0,0)] * h * w
   end
 
   def index_at_point(x, y)
@@ -22,7 +22,7 @@ class PPMImage
       file.write("#{width} #{height}\n")
       file.write("255\n")
       @data.each_with_index do |pixel, idx|
-        file.write("#{pixel[0]} #{pixel[1]} #{pixel[2]} ")
+        file.write("#{pixel.r} #{pixel.g} #{pixel.b} ")
       end
     end
   end

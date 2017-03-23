@@ -2,6 +2,7 @@ require 'matrix'
 
 require 'ppm_image'
 require 'objects'
+require 'color'
 
 EPS = 1e-9
 
@@ -72,28 +73,26 @@ class World
     first_intersection(light_ray)
   end
 
-  def apply_light_to_color(light, distance, obj_color, pix_color)
-    (0..2).each do |idx|
-      pix_color[idx] += [(obj_color[idx] * light.intensity / distance**2).round, 255].min
-    end
+  def apply_light_to_color(light, intersection)
+    intersection.object.color * light.intensity / intersection.distance**2
   end
 
   def render_pixel(x, y)
     ray_x = (2 * (x + 0.5) / width) - 1 # TODO: more rays per pixel
     ray_y = 1 - 2 * (y + 0.5) / height
     r = Ray.new(Vector[0, 0, 0], Vector[ray_x, ray_y, 1])
-    color = [0, 0, 0]
+    color = Color.new(0, 0, 0)
 
     intersection = first_intersection(r)
     unless intersection.nil?
       lights.each do |light|
         light_intersection = light_intersection(light, intersection.point)
         if light_intersection.object == intersection.object
-          apply_light_to_color(light, light_intersection.distance, intersection.object.color, color)
+          color += apply_light_to_color(light, light_intersection).clamp
         end
       end
     end
-    image.set(x, y, color)
+    image.set(x, y, color.round)
   end
 
   def render
@@ -128,9 +127,9 @@ w = World.new(250, 250)
 ].each { |light| w.add_light(light) }
 
 [
-  Sphere.new(Vector[0, 1, 10], 4, [0, 234, 32]),
-  Sphere.new(Vector[-2, 1, 4], 1, [111, 2, 23]),
-  Sphere.new(Vector[2, -1, 4], 1.5, [42, 25, 255])
+  Sphere.new(Vector[0, 1, 10], 4, Color.new(0, 234, 32)),
+  Sphere.new(Vector[-2, 1, 4], 1, Color.new(111, 2, 23)),
+  Sphere.new(Vector[2, -1, 4], 1.5, Color.new(42, 25, 255))
 ].each { |obj| w.add(obj) }
 
 w.render
