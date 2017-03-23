@@ -72,9 +72,9 @@ class World
     first_intersection(light_ray)
   end
 
-  def apply_light_to_color(light, distance, color)
-    color.map do |c|
-      [(c * light.intensity / distance**2).round, 255].min
+  def apply_light_to_color(light, distance, obj_color, pix_color)
+    (0..2).each do |idx|
+      pix_color[idx] += [(obj_color[idx] * light.intensity / distance**2).round, 255].min
     end
   end
 
@@ -86,14 +86,11 @@ class World
 
     intersection = first_intersection(r)
     unless intersection.nil?
-      color = intersection.object.color
       lights.each do |light|
         light_intersection = light_intersection(light, intersection.point)
-        color = if light_intersection.object != intersection.object
-                  [0,0,0]
-                else
-                  apply_light_to_color(light, light_intersection.distance, color)
-                end
+        if light_intersection.object == intersection.object
+          apply_light_to_color(light, light_intersection.distance, intersection.object.color, color)
+        end
       end
     end
     image.set(x, y, color)
@@ -124,15 +121,16 @@ end
 # end
 
 
-s  = Sphere.new(Vector[0, 1, 10], 4, [0, 234, 32])
-s1 = Sphere.new(Vector[-2, 1, 4], 1, [111, 2, 23])
-s2 = Sphere.new(Vector[2, -1, 4], 1.5, [42, 25, 255])
-l = Light.new(Vector[-8, 0, -1], 30)
-#l2 = Light.new(Vector[0,0,0], 1e-3)
 w = World.new(250, 250)
-w.add(s)
-w.add(s1)
-w.add(s2)
-w.add_light(l)
-#w.add_light(l2)
+[
+  Light.new(Vector[-8, 0, -1], 30),
+  Light.new(Vector[0,0,0], 15)
+].each { |light| w.add_light(light) }
+
+[
+  Sphere.new(Vector[0, 1, 10], 4, [0, 234, 32]),
+  Sphere.new(Vector[-2, 1, 4], 1, [111, 2, 23]),
+  Sphere.new(Vector[2, -1, 4], 1.5, [42, 25, 255])
+].each { |obj| w.add(obj) }
+
 w.render
