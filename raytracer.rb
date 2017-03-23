@@ -34,15 +34,15 @@ class Sphere < AbstractObject
     @color = color
   end
 
-  def intersections_with(ray)
+  def distance_to_intersection_with(ray)
     radical = ray.direction.dot(ray.origin - center)**2 -
               (ray.origin - center).norm**2 +
               radius**2
-    return [] if radical < -EPS
+    return nil if radical < -EPS
 
     distance = -ray.direction.dot(ray.origin - center)
-    return [distance] if radical.abs < EPS
-    [distance - Math.sqrt(radical), distance + Math.sqrt(radical)]
+    return distance if radical.abs < EPS
+    distance - Math.sqrt(radical)
   end
 end
 
@@ -58,7 +58,7 @@ class World
   end
 
   def render
-    h = w = 100
+    h = w = 250
     image = PPMImage.new(h, w)
     (0..w).each do |x|
       (0..h).each do |y|
@@ -66,10 +66,18 @@ class World
         ray_y = 1 - 2 * (y + 0.5) / h
         r = Ray.new(Vector[0, 0, 0], Vector[ray_x, ray_y, 1].normalize)
 
-        objects.each do |object|
-          intersect = object.intersections_with(r)
-          image.set(x, y, object.color) unless intersect.empty?
-        end
+        qwe = Hash[
+          objects.map do |object|
+            [object, object.distance_to_intersection_with(r)]
+          end
+        ].reject { |k, v| v.nil? }
+        color = if qwe.empty?
+                  [0,0,0]
+                else
+                  obj = qwe.min_by { |_, v| v }[0]
+                  obj.color
+                end
+        image.set(x, y, color)
       end
     end
     image.write('test.ppm')
@@ -119,8 +127,8 @@ class PPMImage
   end
 end
 
-s = Sphere.new(Vector[2, 2, 6], 5, [0, 234, 32])
-s1 = Sphere.new(Vector[0, 5, 7], 2, [111, 2, 23])
+s  = Sphere.new(Vector[0, 5, 6], 3, [0, 234, 32])
+s1 = Sphere.new(Vector[0, 2, 7], 2, [111, 2, 23])
 w = World.new
 w.add(s)
 w.add(s1)
