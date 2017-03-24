@@ -91,7 +91,7 @@ class World
   end
 
   def get_specular(light, intensity, distance)
-    #puts "#{light.specular_color.inspect} * #{intensity} * #{light.specular_power} / #{distance} = #{(light.specular_color * intensity * light.specular_power / distance).inspect}"
+    # puts "#{light.specular_color.inspect} * #{intensity} * #{light.specular_power} / #{distance} = #{(light.specular_color * intensity * light.specular_power / distance).inspect}"
     light.specular_color * intensity * light.specular_power / distance
   end
 
@@ -108,18 +108,14 @@ class World
     ndotL = normal.dot(light_direction)
 
     h = (light_direction + view_direction).normalize
-    ndotH = normal.dot(h).abs
+    ndotH = [normal.dot(h), 0].max
 
     Light.new(get_diffuse(light, [ndotL, 1].min, distance),
-              get_specular(light, [ndotH, 1].min**1, distance))
+              get_specular(light, [ndotH, 1].min**42, distance))
   end
 
   def close(u, v)
     (0..2).all? do |i| (u[i] - v[i]).abs < EPS end
-  end
-
-  def normal(point)
-    Vector[point[0], point[1], -point[2]]
   end
 
   def render_pixel(x, y)
@@ -128,17 +124,22 @@ class World
     r = Ray.new(Vector[0, 0, 0], Vector[ray_x, ray_y, 1])
 
     intersection = first_intersection(r)
+    image.set(x, y, Color::BLACK)
+
     unless intersection.nil?
       color = Color.new(0, 0, 0)
 
       lights.each do |light|
         light_intersection = light_intersection(light, intersection.point)
         if close(light_intersection.point, intersection.point)
-          lighting = get_lighting_point(light, light_intersection, Vector[ray_x, ray_y, 1], normal(intersection.point))
-          color += (intersection.object.color * (light.diffuse_power * (1 / light_intersection.distance**2))) # + lighting.diffuse
+          normal = (light_intersection.object.center - intersection.point).normalize
+          lighting = get_lighting_point(light, light_intersection, Vector[ray_x, ray_y, 1], normal)
+          color += (intersection.object.color.mult_color(light.diffuse_color * light.diffuse_power * (1 / light_intersection.distance**2))) +
+                   (intersection.object.color.mult_color(lighting.specular))
         end
       end
-      image.set(x, y, color)
+
+      image.set(x, y, color**(1/2.2))
     end
   end
 
@@ -171,15 +172,18 @@ end
 
 d = 250
 w = World.new(d, d)
+dif_pow = 20
+spe_pow = 32
 [
-  PointLight.new(Vector[-1, -1, 2], Color::WHITE, 1, Color::WHITE, 0.8),
-#  PointLight.new(Vector[0, 0, 0], Color::WHITE, 0.1, Color::WHITE, 0.1),
+  PointLight.new(Vector[-10, 10, 10], Color::GREEN, dif_pow, Color::GREEN, spe_pow),
+  PointLight.new(Vector[0, 10, 7], Color::RED, dif_pow, Color::RED, spe_pow),
+  PointLight.new(Vector[10, 10, 10], Color::BLUE, dif_pow, Color::BLUE, spe_pow),
 ].each { |light| w.add_light(light) }
 
 [
-  Sphere.new(Vector[0, 0, 4], 1, Color.new(0, 1, 0)),
-  # Sphere.new(Vector[-2, 1, 4], 1, Color.new(111, 2, 23)),
-  # Sphere.new(Vector[2, -1, 4], 1.5, Color.new(42, 25, 255))
+  Sphere.new(Vector[0, 0, 10], 4, Color::WHITE),
+  # Sphere.new(Vector[-2, 1, 4], 1, Color.new(0.9, 0, 0)),
+  # Sphere.new(Vector[2, -1, 4], 1.5, Color.new(0, 0, 0.9))
 ].each { |obj| w.add(obj) }
 
 w.render

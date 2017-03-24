@@ -4,7 +4,7 @@ class PPMImage
   def initialize(h, w)
     @height = h
     @width = w
-    @data = [Color.new(0,0,0)] * h * w
+    @data = [Color::WHITE] * h * w
   end
 
   def index_at_point(x, y)
