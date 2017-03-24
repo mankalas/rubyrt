@@ -21,9 +21,9 @@ class PPMImage
       file.write("# test\n")
       file.write("#{width} #{height}\n")
       max_pixel = @data.max_by { |pixel| [pixel.r, pixel.g, pixel.b].max }
-      file.write("#{[max_pixel.r, max_pixel.g, max_pixel.b].max}\n")
+      file.write("255\n")
       @data.each do |pixel|
-        file.write("#{pixel.r} #{pixel.g} #{pixel.b} ")
+        file.write("#{(pixel.r * 255.0).round} #{(pixel.g * 255.0).round} #{(pixel.b * 255.0).round} ")
       end
     end
   end

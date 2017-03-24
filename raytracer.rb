@@ -91,7 +91,7 @@ class World
   end
 
   def get_specular(light, intensity, distance)
-#    puts "#{light.specular_color.inspect} * #{intensity} * #{light.specular_power} / #{distance} = #{(light.specular_color * intensity * light.specular_power / distance).inspect}"
+    #puts "#{light.specular_color.inspect} * #{intensity} * #{light.specular_power} / #{distance} = #{(light.specular_color * intensity * light.specular_power / distance).inspect}"
     light.specular_color * intensity * light.specular_power / distance
   end
 
@@ -108,14 +108,18 @@ class World
     ndotL = normal.dot(light_direction)
 
     h = (light_direction + view_direction).normalize
-    ndotH = normal.dot(h)
+    ndotH = normal.dot(h).abs
 
-    Light.new(get_diffuse(light, [ndotL, 255].min, distance),
-              get_specular(light, [ndotH, 255].min, distance))
+    Light.new(get_diffuse(light, [ndotL, 1].min, distance),
+              get_specular(light, [ndotH, 1].min**1, distance))
   end
 
   def close(u, v)
     (0..2).all? do |i| (u[i] - v[i]).abs < EPS end
+  end
+
+  def normal(point)
+    Vector[point[0], point[1], -point[2]]
   end
 
   def render_pixel(x, y)
@@ -130,12 +134,11 @@ class World
       lights.each do |light|
         light_intersection = light_intersection(light, intersection.point)
         if close(light_intersection.point, intersection.point)
-          lighting = get_lighting_point(light, light_intersection, Vector[ray_x, ray_y, 1], intersection.point)
-          color += (intersection.object.color + lighting.specular) # + lighting.diffuse
+          lighting = get_lighting_point(light, light_intersection, Vector[ray_x, ray_y, 1], normal(intersection.point))
+          color += (intersection.object.color * (light.diffuse_power * (1 / light_intersection.distance**2))) # + lighting.diffuse
         end
       end
-
-      image.set(x, y, color.round)
+      image.set(x, y, color)
     end
   end
 
@@ -169,14 +172,14 @@ end
 d = 250
 w = World.new(d, d)
 [
-  PointLight.new(Vector[-4, 0, 1], Color::WHITE, 1, Color::WHITE, 1),
-#  Light.new(Vector[0,0,0], 15)
+  PointLight.new(Vector[-1, -1, 2], Color::WHITE, 1, Color::WHITE, 0.8),
+#  PointLight.new(Vector[0, 0, 0], Color::WHITE, 0.1, Color::WHITE, 0.1),
 ].each { |light| w.add_light(light) }
 
 [
-  Sphere.new(Vector[0, 0, 4], 1, Color.new(0, 255, 0)),
-#  Sphere.new(Vector[-2, 1, 4], 1, Color.new(111, 2, 23)),
-#  Sphere.new(Vector[2, -1, 4], 1.5, Color.new(42, 25, 255))
+  Sphere.new(Vector[0, 0, 4], 1, Color.new(0, 1, 0)),
+  # Sphere.new(Vector[-2, 1, 4], 1, Color.new(111, 2, 23)),
+  # Sphere.new(Vector[2, -1, 4], 1.5, Color.new(42, 25, 255))
 ].each { |obj| w.add(obj) }
 
 w.render
