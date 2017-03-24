@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup'
+
+require 'optparse'
+require 'matrix'
+require 'byebug'
+
+require 'ppm_image'
+require 'objects'
+require 'color'
+require 'light'
+require 'world'
+
+EPS = 1e-9
+
+options = {}
+OptionParser.new do |opts|
+  opts.banner = 'Usage: console.rb [options]'
+
+  opts.on('-h', '--height 1', Integer, 'Height of the rendered image') do |h|
+    options[:height] = h
+  end
+
+  opts.on('-w', '--width 1', Integer, 'Widthof the rendered image') do |w|
+    options[:width] = w
+  end
+end.parse!
+
+w = World.new(options[:width], options[:height])
+dif_pow = 20
+spe_pow = 32
+[
+  PointLight.new(Vector[-10, 10, 10], Color::GREEN, dif_pow, Color::GREEN, spe_pow),
+  PointLight.new(Vector[0, 10, 7], Color::RED, dif_pow, Color::RED, spe_pow),
+  PointLight.new(Vector[10, 10, 10], Color::BLUE, dif_pow, Color::BLUE, spe_pow),
+].each { |light| w.add_light(light) }
+
+[
+  Sphere.new(Vector[0, 0, 10], 4, Color::WHITE),
+  Sphere.new(Vector[-2, 1, 4], 1, Color::BLUE),
+  Sphere.new(Vector[2, -1, 4], 1.5, Color::RED),
+  Plane.new(Vector[0, -10, 0], Vector[0, -1, 0], Color::WHITE),
+].each { |obj| w.add(obj) }
+
+w.render

@@ -1,48 +1,3 @@
-require 'matrix'
-require 'byebug'
-
-require 'ppm_image'
-require 'objects'
-require 'color'
-
-EPS = 1e-9
-
-class PointLight
-  attr_reader :position, :diffuse_color, :diffuse_power, :specular_color, :specular_power
-
-  def initialize(position, diffuse_color, diffuse_power, specular_color, specular_power)
-    @position = position
-    @diffuse_color = diffuse_color
-    @diffuse_power = diffuse_power
-    @specular_color = specular_color
-    @specular_power = specular_power
-  end
-end
-
-class Light
-  attr_reader :diffuse, :specular
-
-  def initialize(diffuse, specular)
-    @diffuse = diffuse
-    @specular = specular
-  end
-end
-
-class Camera
-  def initialize(position, direction, focale = 45)
-
-  end
-end
-
-class Ray
-  attr_reader :direction, :origin
-
-  def initialize(origin, direction)
-    @origin = origin
-    @direction = direction.normalize
-  end
-end
-
 class Intersection
   attr_reader :ray, :object, :distance, :point
 
@@ -51,6 +6,12 @@ class Intersection
     @object = object
     @distance = distance
     @point = ray.direction * distance + ray.origin
+  end
+end
+
+class Camera
+  def initialize(position, direction, focale = 45)
+
   end
 end
 
@@ -144,10 +105,6 @@ class World
     end
   end
 
-  def test
-    render_pixel(55, height / 2)
-  end
-
   def render
     (0..width).each do |x|
       (0..height).each do |y|
@@ -157,22 +114,3 @@ class World
     image.write('test.ppm')
   end
 end
-
-d = 250
-w = World.new(d, d)
-dif_pow = 20
-spe_pow = 32
-[
-  PointLight.new(Vector[-10, 10, 10], Color::GREEN, dif_pow, Color::GREEN, spe_pow),
-  PointLight.new(Vector[0, 10, 7], Color::RED, dif_pow, Color::RED, spe_pow),
-  PointLight.new(Vector[10, 10, 10], Color::BLUE, dif_pow, Color::BLUE, spe_pow),
-].each { |light| w.add_light(light) }
-
-[
-  Sphere.new(Vector[0, 0, 10], 4, Color::WHITE),
-  Sphere.new(Vector[-2, 1, 4], 1, Color::BLUE),
-  Sphere.new(Vector[2, -1, 4], 1.5, Color::RED),
-  Plane.new(Vector[0, -10, 0], Vector[0, -1, 0], Color::WHITE),
-].each { |obj| w.add(obj) }
-
-w.render
