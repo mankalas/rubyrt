@@ -127,12 +127,13 @@ class World
     image.set(x, y, Color::BLACK)
 
     unless intersection.nil?
+      puts intersection.inspect if x == 0 and y == 0
       color = Color.new(0, 0, 0)
 
       lights.each do |light|
         light_intersection = light_intersection(light, intersection.point)
-        if close(light_intersection.point, intersection.point)
-          normal = (light_intersection.object.center - intersection.point).normalize
+        if light_intersection && close(light_intersection.point, intersection.point)
+          normal = (light_intersection.object.centre - intersection.point).normalize
           lighting = get_lighting_point(light, light_intersection, Vector[ray_x, ray_y, 1], normal)
           color += (intersection.object.color.mult_color(light.diffuse_color * light.diffuse_power * (1 / light_intersection.distance**2))) +
                    (intersection.object.color.mult_color(lighting.specular))
@@ -157,19 +158,6 @@ class World
   end
 end
 
-# class Plane < AbstractObject
-#   attr_reader :normal
-
-#   def initialize(center, normal)
-#     super(center)
-#     @normal = normal.normalize
-#   end
-
-#   def intersection_with(ray)
-
-#   end
-# end
-
 d = 250
 w = World.new(d, d)
 dif_pow = 20
@@ -182,8 +170,9 @@ spe_pow = 32
 
 [
   Sphere.new(Vector[0, 0, 10], 4, Color::WHITE),
-  # Sphere.new(Vector[-2, 1, 4], 1, Color.new(0.9, 0, 0)),
-  # Sphere.new(Vector[2, -1, 4], 1.5, Color.new(0, 0, 0.9))
+  Sphere.new(Vector[-2, 1, 4], 1, Color::BLUE),
+  Sphere.new(Vector[2, -1, 4], 1.5, Color::RED),
+  Plane.new(Vector[0, -10, 0], Vector[0, -1, 0], Color::WHITE),
 ].each { |obj| w.add(obj) }
 
 w.render

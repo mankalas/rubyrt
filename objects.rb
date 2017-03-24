@@ -1,28 +1,44 @@
 class AbstractObject
-  attr_reader :center
+  attr_reader :centre, :color
 
-  def initialize(center)
-    @center = center
+  def initialize(centre, color)
+    @centre = centre
+    @color = color
   end
 end
 
 class Sphere < AbstractObject
-  attr_reader :radius, :color
+  attr_reader :radius
 
-  def initialize(center, radius, color)
-    super(center)
+  def initialize(centre, radius, color)
+    super(centre, color)
     @radius = radius
-    @color = color
   end
 
   def distance_to_intersection_with(ray)
-    radical = ray.direction.dot(ray.origin - center)**2 -
-              (ray.origin - center).norm**2 +
+    radical = ray.direction.dot(ray.origin - centre)**2 -
+              (ray.origin - centre).norm**2 +
               radius**2
-    return nil if radical < -EPS
+    return if radical < -EPS
 
-    distance = -ray.direction.dot(ray.origin - center)
+    distance = -ray.direction.dot(ray.origin - centre)
     return distance if radical.abs < EPS
     distance - Math.sqrt(radical)
+  end
+end
+
+class Plane < AbstractObject
+  attr_reader :normal
+
+  def initialize(centre, normal, color)
+    super(centre, color)
+    @normal = normal.normalize
+  end
+
+  def distance_to_intersection_with(ray)
+    denom = normal.dot(ray.direction)
+    return if denom.abs < EPS
+    d = (centre - ray.origin).dot(normal) / denom
+    return d if d > 0
   end
 end
