@@ -1,46 +1,46 @@
-class Color
+require 'matrix'
 
-  attr_reader :r, :g, :b
-
-  def initialize(r, g, b)
-    @r, @g, @b = r, g, b
+class Color < Vector
+  def r
+    self[0]
   end
 
-  def +(other)
-    Color.new(r + other.r, g + other.g, b + other.b)
+  def g
+    self[1]
   end
 
-  def *(other)
-    Color.new(*(to_a.map { |c| c * other }))
+  def b
+    self[2]
   end
 
-  def **(other)
-    Color.new(*(to_a.map { |c| c ** other }))
+  def *(x)
+    case x
+    when Color
+      els = [@elements[0] * x.r, @elements[1] * x.g, @elements[2] * x.b]
+      self.class.elements(els, false)
+    else
+      super(x)
+    end
   end
 
-  def mult_color(other)
-    Color.new(r * other.r, g * other.g, b * other.b)
+  def /(x)
+    case x
+    when Color
+      els = [@elements[0] / x.r, @elements[1] / x.g, @elements[2] / x.b]
+      self.class.elements(els, false)
+    else
+      super(x)
+    end
   end
 
-  def /(other)
-    Color.new(*(to_a.map { |c| c / other }))
+  def **(x)
+    els = @elements.map { |e| e**x }
+    self.class.elements(els, false)
   end
 
-  def to_a
-    [r, g, b]
-  end
-
-  def clamp
-    Color.new(*(to_a.map { |c| [c, 1].min }))
-  end
-
-  def round
-    Color.new(*(to_a.map(&:round)))
-  end
-
-  WHITE = Color.new(0.9, 0.9, 0.9)
-  BLACK = Color.new(0, 0, 0)
-  RED = Color.new(0.9, 0.3, 0.3)
-  GREEN = Color.new(0.1, 0.9, 0.1)
-  BLUE = Color.new(0.1, 0.1, 0.9)
+  WHITE = Color[0.9, 0.9, 0.9]
+  BLACK = Color[0, 0, 0]
+  RED = Color[0.9, 0.3, 0.3]
+  GREEN = Color[0.1, 0.9, 0.1]
+  BLUE = Color[0.1, 0.1, 0.9]
 end

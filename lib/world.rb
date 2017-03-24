@@ -89,15 +89,15 @@ class World
 
     unless intersection.nil?
       puts intersection.inspect if x == 0 and y == 0
-      color = Color.new(0, 0, 0)
+      color = Color::BLACK
 
       lights.each do |light|
         light_intersection = light_intersection(light, intersection.point)
         if light_intersection && close(light_intersection.point, intersection.point)
           normal = (light_intersection.object.centre - intersection.point).normalize
           lighting = get_lighting_point(light, light_intersection, Vector[ray_x, ray_y, 1], normal)
-          color += (intersection.object.color.mult_color(light.diffuse_color * light.diffuse_power * (1 / light_intersection.distance**2))) +
-                   (intersection.object.color.mult_color(lighting.specular))
+          color += (intersection.object.color * light.diffuse_color * light.diffuse_power * (1 / light_intersection.distance**2)) +
+                   (intersection.object.color * lighting.specular)
         end
       end
 
