@@ -2,6 +2,7 @@
 
 require 'bundler/setup'
 
+require 'benchmark'
 require 'optparse'
 require 'matrix'
 require 'byebug'
@@ -43,4 +44,7 @@ spe_pow = 32
   Plane.new(Vector[0, -10, 0], Vector[0, -1, 0], Color::WHITE),
 ].each { |obj| w.add(obj) }
 
-w.render
+puts "Rendering world"
+puts Benchmark.measure { w.render }
+puts "Saving image"
+puts Benchmark.measure { w.image.write_png('test') }
