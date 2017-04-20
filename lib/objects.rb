@@ -27,18 +27,20 @@ class Sphere < AbstractObject
   def initialize(centre, radius, color = Color::GREEN)
     super(centre, color)
     @radius = radius
+    @radius2 = radius * radius
   end
 
   def intersection_with(ray)
-    dist_from_ray_orig_to_obj_centre = ray.origin - centre
-    distance = ray.direction.dot(dist_from_ray_orig_to_obj_centre).abs
-    radical = distance**2 - dist_from_ray_orig_to_obj_centre.norm**2 + radius**2
-
-    return if radical < -EPS
-    return Intersection.new(ray, self, distance) if radical.abs < EPS
-
-    mult = ray.origin.dot(centre) < 0 ? -1 : 1
-    Intersection.new(ray, self, distance + mult * Math.sqrt(radical))
+    l = centre - ray.origin
+    t_ca = l.dot(ray.direction)
+    return if t_ca < 0
+    d2 = l.dot(l) - t_ca * t_ca
+    return if d2 > radius2
+    t_hc = Math.sqrt(radius2 - d2)
+    t0 = t_ca - t_hc
+    t1 = t_ca + t_hc
+    return if t0 < 0 && t1 < 0
+    Intersection.new(ray, self, [t0, t1].min)
   end
 
   class Intersection < AbstractIntersection
@@ -46,6 +48,10 @@ class Sphere < AbstractObject
       (point - object.centre).normalize
     end
   end
+
+  private
+
+  attr_reader :radius2
 end
 
 class Plane < AbstractObject
