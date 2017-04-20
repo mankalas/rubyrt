@@ -63,11 +63,12 @@ class World
       light_intersection = light_first_intersection(light_point, object_intersection)
       next unless can_see_intersection?(light_intersection, object_intersection)
       light = light_point.lighting(light_intersection, Vector[ray_x, ray_y, 1], object_intersection.normal)
-      color += (object_intersection.object.color * light_point.diffuse_color * light_point.diffuse_power * (1 / light_intersection.distance**2)) +
-               (object_intersection.object.color * light.specular)
+      next unless light
+      color += object_intersection.object.color * (light.diffuse + light.specular)
     end
 
-    image.set(x, y, color**(1 / 2.2))
+    color **= 1 / 3.2
+    image.set(x, y, color)
   end
 
   def render

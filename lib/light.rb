@@ -6,7 +6,8 @@ class PointLight
 
   def initialize(position,
                  diffuse_color, diffuse_power,
-                 specular_color, specular_power, specular_hardness = 100)
+                 specular_color, specular_power,
+                 specular_hardness = 100)
     @position = position
     @diffuse_color = diffuse_color
     @diffuse_power = diffuse_power
@@ -19,25 +20,22 @@ class PointLight
     return unless diffuse_power > 0
 
     light_direction = intersection.ray.direction
-    distance = intersection.distance**2
-
-    ndotL = normal.dot(light_direction)
-
+    ndotL = normal.dot(light_direction).abs
     h = (light_direction + view_direction).normalize
     ndotH = [normal.dot(h), 0].max
-
-    Light.new(diffuse_factoring(ndotL, distance),
-              specular_factoring(ndotH, distance))
+    distance_sq = intersection.distance * intersection.distance
+    Light.new(diffuse_factoring(ndotL, distance_sq),
+              specular_factoring(ndotH, distance_sq))
   end
 
-  def diffuse_factoring(intensity, distance)
-    saturated_intensity = [intensity, 1].min
-    diffuse_color * saturated_intensity * diffuse_power / distance
+  def diffuse_factoring(intensity, distance_sq)
+    intensity = [intensity, 1].min
+    diffuse_color * intensity * diffuse_power / distance_sq
   end
 
-  def specular_factoring(intensity, distance)
-    saturated_intensity = [intensity, 1].min**specular_hardness
-    specular_color * saturated_intensity * specular_power / distance
+  def specular_factoring(intensity, distance_sq)
+    intensity = [intensity, 1].min**specular_hardness
+    specular_color * intensity * specular_power / distance_sq
   end
 end
 
