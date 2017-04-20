@@ -24,7 +24,7 @@ class World
   end
 
   def first_intersection(ray)
-    objects.map { |object| object.intersection_with(ray) }.compact.min_by(&:distance)
+    objects.map { |object| object.intersection_with(ray) }.compact.min_by(&:distance2)
   end
 
   def light_first_intersection(light, intersection)
@@ -40,7 +40,7 @@ class World
       light_intersection.object == object_intersection.object &&
       # Light intersects close to the view point (not on the other
       # side of the object for instance)
-      close?(light_intersection.point, object_intersection.point)
+      true#close?(light_intersection.point, object_intersection.point)
   end
 
   def close?(u, v)

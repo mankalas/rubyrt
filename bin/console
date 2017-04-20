@@ -31,13 +31,13 @@ end.parse!
 
 w = World.new(options[:width], options[:height])
 dif_pow = 20
-spe_pow = 32
+spe_pow = 24
 [
-  PointLight.new(Vector[-10, 10, 0.1], Color::GREEN, dif_pow, Color::GREEN, spe_pow),
-  PointLight.new(Vector[0, 10, 0.1], Color::RED, dif_pow, Color::RED, spe_pow),
-  PointLight.new(Vector[10, 10, 0.1], Color::BLUE, dif_pow, Color::BLUE, spe_pow),
-  PointLight.new(Vector[-5, 0, 0.1], Color::WHITE, dif_pow, Color::WHITE, spe_pow),
-  Sphere.new(Vector[0, 0, 10], 4, Color::WHITE),
+  PointLight.new(Vector[-10, 10, -1], Color::GREEN, dif_pow, Color::GREEN, spe_pow),
+  PointLight.new(Vector[0, 10, -1], Color::RED, dif_pow, Color::RED, spe_pow),
+  PointLight.new(Vector[10, 10, -1], Color::BLUE, dif_pow, Color::BLUE, spe_pow),
+  PointLight.new(Vector[0, 0, -5], Color::WHITE, dif_pow, Color::WHITE, spe_pow),
+  Sphere.new(Vector[0, 0, 10], 4, Color::GREEN),
   Sphere.new(Vector[-2, 1, 4], 1, Color::BLUE),
   Sphere.new(Vector[2, -1, 4], 1.5, Color::RED),
   Plane.new(Vector[0, -10, 0], Vector[0, -1, 0], Color::WHITE),

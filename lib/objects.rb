@@ -11,22 +11,19 @@ class AbstractObject
 end
 
 class AbstractIntersection
-  attr_reader :ray, :object, :distance, :point
+  attr_reader :ray, :object, :distance2, :point
 
   def initialize(ray, object, distance)
     @ray = ray
     @object = object
-    @distance = distance
+    @distance2 = distance * distance
     @point = ray.direction * distance + ray.origin
   end
 end
 
 class Sphere < AbstractObject
-  attr_reader :radius
-
   def initialize(centre, radius, color = Color::GREEN)
     super(centre, color)
-    @radius = radius
     @radius2 = radius * radius
   end
 
@@ -45,7 +42,7 @@ class Sphere < AbstractObject
 
   class Intersection < AbstractIntersection
     def normal
-      (point - object.centre).normalize
+      (object.centre - point).normalize
     end
   end
 
