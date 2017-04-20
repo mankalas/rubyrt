@@ -38,6 +38,11 @@ class Color < Vector
     self.class.elements(els, false)
   end
 
+  def normalize
+    els = @elements.map { |e| (e * 255.0).round }
+    self.class.elements(els, false)
+  end
+
   WHITE = Color[0.9, 0.9, 0.9]
   BLACK = Color[0, 0, 0]
   RED = Color[0.9, 0.3, 0.3]

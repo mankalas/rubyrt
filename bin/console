@@ -6,7 +6,7 @@ require 'optparse'
 require 'matrix'
 require 'byebug'
 
-require 'ppm_image'
+require 'image_exporter'
 require 'objects'
 require 'color'
 require 'light'
@@ -31,9 +31,9 @@ w = World.new(options[:width], options[:height])
 dif_pow = 20
 spe_pow = 32
 [
-  PointLight.new(Vector[-10, 10, 10], Color::GREEN, dif_pow, Color::GREEN, spe_pow),
-  PointLight.new(Vector[0, 10, 7], Color::RED, dif_pow, Color::RED, spe_pow),
-  PointLight.new(Vector[10, 10, 10], Color::BLUE, dif_pow, Color::BLUE, spe_pow),
+  PointLight.new(Vector[-10, 10, -10], Color::GREEN, dif_pow, Color::GREEN, spe_pow),
+  PointLight.new(Vector[0, 10, -7], Color::RED, dif_pow, Color::RED, spe_pow),
+  PointLight.new(Vector[10, 10, -10], Color::BLUE, dif_pow, Color::BLUE, spe_pow),
 ].each { |light| w.add_light(light) }
 
 [

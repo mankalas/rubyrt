@@ -23,7 +23,7 @@ class World
     @width = w
     @objects = []
     @lights = []
-    @image = PPMImage.new(h, w)
+    @image = ImageExporter.new(h, w)
   end
 
   def add(object)
@@ -106,11 +106,10 @@ class World
   end
 
   def render
-    (0..width).each do |x|
-      (0..height).each do |y|
+    (0..width - 1).each do |x|
+      (0..height - 1).each do |y|
         render_pixel(x, y)
       end
     end
-    image.write('test.ppm')
   end
 end
