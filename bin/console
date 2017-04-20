@@ -2,6 +2,7 @@
 
 require 'bundler/setup'
 
+require 'ruby-prof'
 require 'benchmark'
 require 'optparse'
 require 'matrix'
@@ -43,6 +44,13 @@ spe_pow = 32
 ].each { |obj| w.add(obj) }
 
 puts "Rendering world"
-puts Benchmark.measure { w.render }
+# profile the code
+result = RubyProf.profile do
+  w.render
+end
+# print a graph profile to text
+printer = RubyProf::FlatPrinter.new(result)
+printer.print(STDOUT, {})
+
 puts "Saving image"
 puts Benchmark.measure { w.image.write_png('test') }
