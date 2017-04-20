@@ -1,12 +1,14 @@
 require 'color'
 
 class AbstractObject
-  attr_reader :centre, :color
+  attr_reader :centre, :color, :material_type, :refractive_index
   EPS = 1e-6
 
-  def initialize(centre, color)
+  def initialize(centre, color, material_type = nil, refractive_index = 0)
     @centre = centre
     @color = color
+    @material_type = material_type
+    @refractive_index = refractive_index
   end
 end
 
@@ -22,8 +24,8 @@ class AbstractIntersection
 end
 
 class Sphere < AbstractObject
-  def initialize(centre, radius, color = Color::GREEN)
-    super(centre, color)
+  def initialize(centre, radius, color = Color::GREEN, material_type = nil, refractive_index = 0)
+    super(centre, color, material_type, refractive_index)
     @radius2 = radius * radius
   end
 
@@ -54,8 +56,8 @@ end
 class Plane < AbstractObject
   attr_reader :normal
 
-  def initialize(centre, normal, color = Color::WHITE)
-    super(centre, color)
+  def initialize(centre, normal, color = Color::WHITE, material_type = nil, refractive_index = 0)
+    super(centre, color, material_type, refractive_index)
     @normal = normal.normalize
   end
 

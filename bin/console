@@ -39,8 +39,9 @@ spe_pow = 24
   PointLight.new(Vec3d.new(0, 0, -5), Color::WHITE, dif_pow, Color::WHITE, spe_pow),
   Sphere.new(Vec3d.new(0, 0, 10), 4, Color::GREEN),
   Sphere.new(Vec3d.new(-2, 1, 4), 1, Color::BLUE),
-  Sphere.new(Vec3d.new(2, -1, 4), 1.5, Color::RED),
-  Plane.new(Vec3d.new(0, -10, 0), Vec3d.new(0, -1, 0), Color::WHITE),
+  Sphere.new(Vec3d.new(2, -1, 4), 1.5, Color::RED, :reflection_and_refraction, 0.2),
+  Plane.new(Vec3d.new(0, -15, 0), Vec3d.new(0, -1, 0), Color::WHITE),
+  Plane.new(Vec3d.new(0, 0, -15), Vec3d.new(0, 0, -1), Color.new(1, 1, 0)),
 ].each { |obj| w.add(obj) }
 
 puts "Rendering world"
