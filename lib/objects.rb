@@ -10,6 +10,17 @@ class AbstractObject
   end
 end
 
+class AbstractIntersection
+  attr_reader :ray, :object, :distance, :point
+
+  def initialize(ray, object, distance)
+    @ray = ray
+    @object = object
+    @distance = distance
+    @point = ray.direction * distance + ray.origin
+  end
+end
+
 class Sphere < AbstractObject
   attr_reader :radius
 
@@ -18,14 +29,22 @@ class Sphere < AbstractObject
     @radius = radius
   end
 
-  def distance_to_intersection_with(ray)
+  def intersection_with(ray)
     dist_from_ray_orig_to_obj_centre = ray.origin - centre
     distance = ray.direction.dot(dist_from_ray_orig_to_obj_centre).abs
     radical = distance**2 - dist_from_ray_orig_to_obj_centre.norm**2 + radius**2
+
     return if radical < -EPS
-    return distance if radical.abs < EPS
+    return Intersection.new(ray, self, distance) if radical.abs < EPS
+
     mult = ray.origin.dot(centre) < 0 ? -1 : 1
-    distance + mult * Math.sqrt(radical)
+    Intersection.new(ray, self, distance + mult * Math.sqrt(radical))
+  end
+
+  class Intersection < AbstractIntersection
+    def normal
+      (object.centre - point).normalize
+    end
   end
 end
 
@@ -37,10 +56,16 @@ class Plane < AbstractObject
     @normal = normal.normalize
   end
 
-  def distance_to_intersection_with(ray)
+  def intersection_with(ray)
     denom = normal.dot(ray.direction)
     return if denom.abs < EPS
     d = (centre - ray.origin).dot(normal) / denom
-    return d if d > 0
+    return Intersection.new(ray, self, d) if d > 0
+  end
+
+  class Intersection < AbstractIntersection
+    def normal
+      object.normal
+    end
   end
 end

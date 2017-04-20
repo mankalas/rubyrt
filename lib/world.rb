@@ -1,14 +1,3 @@
-class Intersection
-  attr_reader :ray, :object, :distance, :point
-
-  def initialize(ray, object, distance)
-    @ray = ray
-    @object = object
-    @distance = distance
-    @point = ray.direction * distance + ray.origin
-  end
-end
-
 class Camera
   def initialize(position, direction, focale = 45)
   end
@@ -35,14 +24,11 @@ class World
   end
 
   def first_intersection(ray)
-    objects.map do |object|
-      distance = object.distance_to_intersection_with(ray)
-      Intersection.new(ray, object, distance) if distance
-    end.compact.min_by(&:distance)
+    objects.map { |object| object.intersection_with(ray) }.compact.min_by(&:distance)
   end
 
-  def light_first_intersection(light, point)
-    light_direction = point - light.position
+  def light_first_intersection(light, intersection)
+    light_direction = intersection.point - light.position
     light_ray = Ray.new(light.position, light_direction)
     first_intersection(light_ray)
   end
@@ -75,7 +61,17 @@ class World
               get_specular(light, [ndotH, 1].min**42, distance))
   end
 
-  def close(u, v)
+  def can_see_intersection?(light_intersection, object_intersection)
+    # Light actually intersects with something
+    light_intersection &&
+      # Light intersects with the correct object
+      light_intersection.object == object_intersection.object &&
+      # Light intersects close to the view point (not on the other
+      # side of the object for instance)
+      close?(light_intersection.point, object_intersection.point)
+  end
+
+  def close?(u, v)
     (0..2).all? { |i| (u[i] - v[i]).abs < EPS }
   end
 
@@ -85,19 +81,18 @@ class World
     ray_origin = Vector[0, 0, 0]
     r = Ray.new(ray_origin, Vector[ray_x, ray_y, 1])
 
-    intersection = first_intersection(r)
+    object_intersection = first_intersection(r)
     image.set(x, y, Color::BLACK)
 
-    return if intersection.nil?
+    return if object_intersection.nil?
     color = Color::BLACK
 
     lights.each do |light|
-      light_intersection = light_first_intersection(light, intersection.point)
-      next unless light_intersection && close(light_intersection.point, intersection.point)
-      normal = (light_intersection.object.centre - intersection.point).normalize
-      lighting = get_lighting_point(light, light_intersection, Vector[ray_x, ray_y, 1], normal)
-      color += (intersection.object.color * light.diffuse_color * light.diffuse_power * (1 / light_intersection.distance**2)) +
-               (intersection.object.color * lighting.specular)
+      light_intersection = light_first_intersection(light, object_intersection)
+      next unless can_see_intersection?(light_intersection, object_intersection)
+      lighting = get_lighting_point(light, light_intersection, Vector[ray_x, ray_y, 1], object_intersection.normal)
+      color += (object_intersection.object.color * light.diffuse_color * light.diffuse_power * (1 / light_intersection.distance**2)) +
+               (object_intersection.object.color * lighting.specular)
     end
 
     image.set(x, y, color**(1 / 2.2))
