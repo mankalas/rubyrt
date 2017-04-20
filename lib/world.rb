@@ -82,7 +82,8 @@ class World
   def render_pixel(x, y)
     ray_x = (2 * (x + 0.5) / width) - 1 # TODO: more rays per pixel
     ray_y = 1 - 2 * (y + 0.5) / height
-    r = Ray.new(Vector[0, 0, 0], Vector[ray_x, ray_y, 1])
+    ray_origin = Vector[0, 0, 0]
+    r = Ray.new(ray_origin, Vector[ray_x, ray_y, 1])
 
     intersection = first_intersection(r)
     image.set(x, y, Color::BLACK)
