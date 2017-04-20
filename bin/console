@@ -45,12 +45,12 @@ spe_pow = 32
 
 puts "Rendering world"
 # profile the code
-result = RubyProf.profile do
-  w.render
-end
+#result = RubyProf.profile do
+puts Benchmark.measure { w.render }
+#end
 # print a graph profile to text
-printer = RubyProf::FlatPrinter.new(result)
-printer.print(STDOUT, {})
+#printer = RubyProf::FlatPrinter.new(result)
+#printer.print(STDOUT, {})
 
 puts "Saving image"
 puts Benchmark.measure { w.image.write_png('test') }
