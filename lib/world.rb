@@ -11,7 +11,6 @@ end
 
 class Camera
   def initialize(position, direction, focale = 45)
-
   end
 end
 
@@ -76,7 +75,7 @@ class World
   end
 
   def close(u, v)
-    (0..2).all? do |i| (u[i] - v[i]).abs < EPS end
+    (0..2).all? { |i| (u[i] - v[i]).abs < EPS }
   end
 
   def render_pixel(x, y)
@@ -87,22 +86,19 @@ class World
     intersection = first_intersection(r)
     image.set(x, y, Color::BLACK)
 
-    unless intersection.nil?
-      puts intersection.inspect if x == 0 and y == 0
-      color = Color::BLACK
+    return if intersection.nil?
+    color = Color::BLACK
 
-      lights.each do |light|
-        light_intersection = light_intersection(light, intersection.point)
-        if light_intersection && close(light_intersection.point, intersection.point)
-          normal = (light_intersection.object.centre - intersection.point).normalize
-          lighting = get_lighting_point(light, light_intersection, Vector[ray_x, ray_y, 1], normal)
-          color += (intersection.object.color * light.diffuse_color * light.diffuse_power * (1 / light_intersection.distance**2)) +
-                   (intersection.object.color * lighting.specular)
-        end
-      end
-
-      image.set(x, y, color**(1/2.2))
+    lights.each do |light|
+      light_intersection = light_intersection(light, intersection.point)
+      next unless light_intersection && close(light_intersection.point, intersection.point)
+      normal = (light_intersection.object.centre - intersection.point).normalize
+      lighting = get_lighting_point(light, light_intersection, Vector[ray_x, ray_y, 1], normal)
+      color += (intersection.object.color * light.diffuse_color * light.diffuse_power * (1 / light_intersection.distance**2)) +
+               (intersection.object.color * lighting.specular)
     end
+
+    image.set(x, y, color**(1 / 2.2))
   end
 
   def render
