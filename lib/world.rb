@@ -33,34 +33,6 @@ class World
     first_intersection(light_ray)
   end
 
-  def apply_light_to_color(light, intersection)
-    intersection.object.color * light.intensity / intersection.distance**2
-  end
-
-  def get_specular(light, intensity, distance)
-    # puts "#{light.specular_color.inspect} * #{intensity} * #{light.specular_power} / #{distance} = #{(light.specular_color * intensity * light.specular_power / distance).inspect}"
-    light.specular_color * intensity * light.specular_power / distance
-  end
-
-  def get_diffuse(light, intensity, distance)
-    light.diffuse_color * intensity * light.diffuse_power / distance
-  end
-
-  def get_lighting_point(light, intersection, view_direction, normal)
-    return unless light.diffuse_power > 0
-
-    light_direction = intersection.ray.direction
-    distance = intersection.distance**2
-
-    ndotL = normal.dot(light_direction)
-
-    h = (light_direction + view_direction).normalize
-    ndotH = [normal.dot(h), 0].max
-
-    Light.new(get_diffuse(light, [ndotL, 1].min, distance),
-              get_specular(light, [ndotH, 1].min**42, distance))
-  end
-
   def can_see_intersection?(light_intersection, object_intersection)
     # Light actually intersects with something
     light_intersection &&
@@ -87,12 +59,12 @@ class World
     return if object_intersection.nil?
     color = Color::BLACK
 
-    lights.each do |light|
-      light_intersection = light_first_intersection(light, object_intersection)
+    lights.each do |light_point|
+      light_intersection = light_first_intersection(light_point, object_intersection)
       next unless can_see_intersection?(light_intersection, object_intersection)
-      lighting = get_lighting_point(light, light_intersection, Vector[ray_x, ray_y, 1], object_intersection.normal)
-      color += (object_intersection.object.color * light.diffuse_color * light.diffuse_power * (1 / light_intersection.distance**2)) +
-               (object_intersection.object.color * lighting.specular)
+      light = light_point.lighting(light_intersection, Vector[ray_x, ray_y, 1], object_intersection.normal)
+      color += (object_intersection.object.color * light_point.diffuse_color * light_point.diffuse_power * (1 / light_intersection.distance**2)) +
+               (object_intersection.object.color * light.specular)
     end
 
     image.set(x, y, color**(1 / 2.2))
