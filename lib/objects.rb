@@ -19,13 +19,10 @@ class Sphere < AbstractObject
   end
 
   def distance_to_intersection_with(ray)
-    distance = -ray.direction.dot(ray.origin - centre)
-
-    radical = ray.direction.dot(ray.origin - centre)**2 -
-              (ray.origin - centre).norm**2 +
-              radius**2
+    dist_from_ray_orig_to_obj_centre = ray.origin - centre
+    distance = ray.direction.dot(dist_from_ray_orig_to_obj_centre).abs
+    radical = distance**2 - dist_from_ray_orig_to_obj_centre.norm**2 + radius**2
     return if radical < -EPS
-
     return distance if radical.abs < EPS
     mult = ray.origin.dot(centre) < 0 ? -1 : 1
     distance + mult * Math.sqrt(radical)
