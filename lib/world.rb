@@ -41,7 +41,7 @@ class World
     end.compact.min_by(&:distance)
   end
 
-  def light_intersection(light, point)
+  def light_first_intersection(light, point)
     light_direction = point - light.position
     light_ray = Ray.new(light.position, light_direction)
     first_intersection(light_ray)
@@ -91,7 +91,7 @@ class World
     color = Color::BLACK
 
     lights.each do |light|
-      light_intersection = light_intersection(light, intersection.point)
+      light_intersection = light_first_intersection(light, intersection.point)
       next unless light_intersection && close(light_intersection.point, intersection.point)
       normal = (light_intersection.object.centre - intersection.point).normalize
       lighting = get_lighting_point(light, light_intersection, Vector[ray_x, ray_y, 1], normal)
