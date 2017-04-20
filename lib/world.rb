@@ -50,8 +50,8 @@ class World
   def render_pixel(x, y)
     ray_x = (2 * (x + 0.5) / width) - 1 # TODO: more rays per pixel
     ray_y = 1 - 2 * (y + 0.5) / height
-    ray_origin = Vector[0, 0, 0]
-    r = Ray.new(ray_origin, Vector[ray_x, ray_y, 1])
+    ray_origin = Vec3d.new(0, 0, 0)
+    r = Ray.new(ray_origin, Vec3d.new(ray_x, ray_y, 1))
 
     object_intersection = first_intersection(r)
     image.set(x, y, Color::BLACK)
@@ -62,7 +62,7 @@ class World
     lights.each do |light_point|
       light_intersection = light_first_intersection(light_point, object_intersection)
       next unless can_see_intersection?(light_intersection, object_intersection)
-      light = light_point.lighting(light_intersection, Vector[ray_x, ray_y, 1], object_intersection.normal)
+      light = light_point.lighting(light_intersection, Vec3d.new(ray_x, ray_y, 1), object_intersection.normal)
       next unless light
       color += object_intersection.object.color * (light.diffuse + light.specular)
     end

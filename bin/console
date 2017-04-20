@@ -5,7 +5,6 @@ require 'bundler/setup'
 require 'ruby-prof'
 require 'benchmark'
 require 'optparse'
-require 'matrix'
 require 'byebug'
 
 require 'image_exporter'
@@ -13,6 +12,7 @@ require 'objects'
 require 'color'
 require 'light'
 require 'world'
+require 'vec3d'
 
 EPS = 1e-9
 
@@ -33,14 +33,14 @@ w = World.new(options[:width], options[:height])
 dif_pow = 20
 spe_pow = 24
 [
-  PointLight.new(Vector[-10, 10, -1], Color::GREEN, dif_pow, Color::GREEN, spe_pow),
-  PointLight.new(Vector[0, 10, -1], Color::RED, dif_pow, Color::RED, spe_pow),
-  PointLight.new(Vector[10, 10, -1], Color::BLUE, dif_pow, Color::BLUE, spe_pow),
-  PointLight.new(Vector[0, 0, -5], Color::WHITE, dif_pow, Color::WHITE, spe_pow),
-  Sphere.new(Vector[0, 0, 10], 4, Color::GREEN),
-  Sphere.new(Vector[-2, 1, 4], 1, Color::BLUE),
-  Sphere.new(Vector[2, -1, 4], 1.5, Color::RED),
-  Plane.new(Vector[0, -10, 0], Vector[0, -1, 0], Color::WHITE),
+  PointLight.new(Vec3d.new(-10, 10, -1), Color::GREEN, dif_pow, Color::GREEN, spe_pow),
+  PointLight.new(Vec3d.new(0, 10, -1), Color::RED, dif_pow, Color::RED, spe_pow),
+  PointLight.new(Vec3d.new(10, 10, -1), Color::BLUE, dif_pow, Color::BLUE, spe_pow),
+  PointLight.new(Vec3d.new(0, 0, -5), Color::WHITE, dif_pow, Color::WHITE, spe_pow),
+  Sphere.new(Vec3d.new(0, 0, 10), 4, Color::GREEN),
+  Sphere.new(Vec3d.new(-2, 1, 4), 1, Color::BLUE),
+  Sphere.new(Vec3d.new(2, -1, 4), 1.5, Color::RED),
+  Plane.new(Vec3d.new(0, -10, 0), Vec3d.new(0, -1, 0), Color::WHITE),
 ].each { |obj| w.add(obj) }
 
 puts "Rendering world"
