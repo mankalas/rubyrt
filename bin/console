@@ -35,9 +35,6 @@ spe_pow = 32
   PointLight.new(Vector[-10, 10, -10], Color::GREEN, dif_pow, Color::GREEN, spe_pow),
   PointLight.new(Vector[0, 10, -7], Color::RED, dif_pow, Color::RED, spe_pow),
   PointLight.new(Vector[10, 10, -10], Color::BLUE, dif_pow, Color::BLUE, spe_pow),
-].each { |light| w.add_light(light) }
-
-[
   Sphere.new(Vector[0, 0, 10], 4, Color::WHITE),
   Sphere.new(Vector[-2, 1, 4], 1, Color::BLUE),
   Sphere.new(Vector[2, -1, 4], 1.5, Color::RED),

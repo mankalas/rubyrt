@@ -26,11 +26,12 @@ class World
   end
 
   def add(object)
-    objects << object
-  end
-
-  def add_light(light)
-    lights << light
+    case object
+    when AbstractObject
+      objects
+    when PointLight
+      lights
+    end << object
   end
 
   def first_intersection(ray)
