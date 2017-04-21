@@ -2,18 +2,16 @@
 class PointLight
   attr_reader :position,
               :diffuse_color, :diffuse_power,
-              :specular_color, :specular_power, :specular_hardness
+              :specular_color, :specular_power
 
   def initialize(position,
                  diffuse_color, diffuse_power,
-                 specular_color, specular_power,
-                 specular_hardness = 100)
+                 specular_color, specular_power)
     @position = position
     @diffuse_color = diffuse_color
     @diffuse_power = diffuse_power
     @specular_color = specular_color
     @specular_power = specular_power
-    @specular_hardness = specular_hardness
   end
 
   def lighting(intersection, view_direction, normal)
@@ -34,7 +32,6 @@ class PointLight
   end
 
   def specular_factoring(intensity, d2)
-    intensity = [intensity, 1].min**specular_hardness
     specular_color * intensity * specular_power / d2
   end
 end

@@ -32,16 +32,32 @@ end.parse!
 w = World.new(options[:width], options[:height])
 dif_pow = 20
 spe_pow = 24
+
+s1 = Sphere.new(Vec3d.new(-1, 0, 8), 4)
+s1.color = Color::GREEN#Vec3d.new(0.6, 0.7, 0.8)
+s1.material_type = :diffuse_and_glossy
+
+s2 = Sphere.new(Vec3d.new(0.5, -0.5, 4), 1.5)
+s2.refractive_index = 1.5
+s2.transparency = 0.5
+s2.color = Color::RED
+s2.material_type = :reflection_and_refraction
+
 [
-  PointLight.new(Vec3d.new(-10, 10, -1), Color::GREEN, dif_pow, Color::GREEN, spe_pow),
-  PointLight.new(Vec3d.new(0, 10, -1), Color::RED, dif_pow, Color::RED, spe_pow),
-  PointLight.new(Vec3d.new(10, 10, -1), Color::BLUE, dif_pow, Color::BLUE, spe_pow),
-  PointLight.new(Vec3d.new(0, 0, -5), Color::WHITE, dif_pow, Color::WHITE, spe_pow),
-  Sphere.new(Vec3d.new(0, 0, 10), 4, Color::GREEN),
-  Sphere.new(Vec3d.new(-2, 1, 4), 1, Color::BLUE),
-  Sphere.new(Vec3d.new(2, -1, 4), 1.5, Color::RED, :reflection_and_refraction, 0.2),
-  Plane.new(Vec3d.new(0, -15, 0), Vec3d.new(0, -1, 0), Color::WHITE),
-  Plane.new(Vec3d.new(0, 0, -15), Vec3d.new(0, 0, -1), Color.new(1, 1, 0)),
+  # PointLight.new(Vec3d.new(-10, 10, -1), Color::GREEN, dif_pow, Color::GREEN, spe_pow),
+  # PointLight.new(Vec3d.new(0, 10, -1), Color::RED, dif_pow, Color::RED, spe_pow),
+  # PointLight.new(Vec3d.new(10, 10, -1), Color::BLUE, dif_pow, Color::BLUE, spe_pow),
+  # PointLight.new(Vec3d.new(0, 0, -5), Color::WHITE, dif_pow, Color::WHITE, spe_pow),
+  # Sphere.new(Vec3d.new(0, 0, 10), 4, Color::GREEN),
+  # Sphere.new(Vec3d.new(-2, 1, 4), 1, Color::BLUE),
+  # Sphere.new(Vec3d.new(2, -1, 4), 1.5, Color::RED),
+  # Plane.new(Vec3d.new(0, -15, 0), Vec3d.new(0, -1, 0), Color::WHITE),
+  # Plane.new(Vec3d.new(0, 0, -15), Vec3d.new(0, 0, -1), Color.new(1, 1, 0)),
+
+  s1, s2,
+  PointLight.new(Vec3d.new(-2, 7, 2), Color::WHITE, 35, Color::WHITE, 35),
+  PointLight.new(Vec3d.new(3, 5, -1.2), Color::WHITE, 31, Color::WHITE, 31),
+
 ].each { |obj| w.add(obj) }
 
 puts "Rendering world"
