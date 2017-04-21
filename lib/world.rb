@@ -52,12 +52,12 @@ class World
 
     return hit_color if depth > max_depth
 
-    object_intersection = first_intersection(ray)
-    return hit_color if object_intersection.nil?
+    hit = first_intersection(ray)
+    return hit_color if hit.nil?
 
-    hit_object = object_intersection.object
-    hit_point = object_intersection.point
-    normal = object_intersection.normal
+    hit_object = hit.object
+    hit_point = hit.point
+    normal = hit.normal
     case hit_object.material_type
 
     when :reflection_and_refraction
@@ -87,11 +87,11 @@ class World
 
     else
       lights.each do |light_point|
-        light_intersection = light_first_intersection(light_point, object_intersection)
-        next unless can_see_intersection?(light_intersection, object_intersection)
-        light = light_point.lighting(light_intersection, Vec3d.new(ray.direction.x, ray.direction.y, 1), object_intersection.normal)
+        light_intersection = light_first_intersection(light_point, hit)
+        next unless can_see_intersection?(light_intersection, hit)
+        light = light_point.lighting(light_intersection, Vec3d.new(ray.direction.x, ray.direction.y, 1), hit.normal)
         next unless light
-        hit_color = object_intersection.object.color * (light.diffuse * hit_object.kd + light.specular * hit_object.ks)
+        hit_color = hit.object.color * (light.diffuse * hit_object.kd + light.specular * hit_object.ks)
       end
     end
     hit_color
