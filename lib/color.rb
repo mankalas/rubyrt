@@ -10,4 +10,5 @@ class Color < Vec3d
   RED = Color.new(0.9, 0.3, 0.3)
   GREEN = Color.new(0.1, 0.9, 0.1)
   BLUE = Color.new(0.1, 0.1, 0.9)
+  SKY = Color.new(0.235294, 0.67451, 0.843137)
 end

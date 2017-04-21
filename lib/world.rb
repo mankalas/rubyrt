@@ -48,7 +48,7 @@ class World
   end
 
   def cast_ray(ray, depth = 0, max_depth = 5, bias = 0.00001)
-    hit_color = Color.new(0.235294, 0.67451, 0.843137)
+    hit_color = Color::SKY
 
     return hit_color if depth > max_depth
 
