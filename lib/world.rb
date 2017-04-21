@@ -47,6 +47,17 @@ class World
     (0..2).all? { |i| (u[i] - v[i]).abs < EPS }
   end
 
+  def cast_reflection_ray(ray, hit, kr, depth)
+    reflection_direction = ray.reflect(hit.normal)
+    cast_ray(Ray.new(hit.point + hit.normal, reflection_direction), depth + 1) * kr
+  end
+
+  def cast_refraction_ray(ray, hit, kr, depth)
+    refraction_direction = ray.refract(hit.normal, hit.object.refractive_index)
+    refraction_color = cast_ray(Ray.new(hit.point + hit.normal, refraction_direction), depth + 1)
+    refraction_color * (1 - kr) * hit.object.transparency
+  end
+
   def cast_ray(ray, depth = 0, max_depth = 5, bias = 0.00001)
     hit_color = Color::SKY
 
@@ -57,13 +68,8 @@ class World
 
     if hit.object.transparency > 0 || hit.object.reflection > 0
       kr = ray.fresnel(hit.normal, hit.object.refractive_index)
-      reflection_direction = ray.reflect(hit.normal)
-      hit_color = cast_ray(Ray.new(hit.point + hit.normal, reflection_direction), depth + 1) * kr
-      if hit.object.transparency > 0
-        refraction_direction = ray.refract(hit.normal, hit.object.refractive_index)
-        refraction_color = cast_ray(Ray.new(hit.point + hit.normal, refraction_direction), depth + 1)
-        hit_color += refraction_color * (1 - kr) * hit.object.transparency
-      end
+      hit_color = cast_reflection_ray(ray, hit, kr, depth)
+      hit_color += cast_refraction_ray(ray, hit, kr, depth) if hit.object.transparency > 0
       hit_color *= hit.object.color
     else
       lights.each do |light_point|
