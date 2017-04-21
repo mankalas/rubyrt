@@ -51,9 +51,9 @@ class Vec3d
   alias norm magnitude
 
   def normalize
-    n = magnitude
-    raise Error, "Zero vectors can not be normalized" if n.zero?
-    self / n
+    n2 = x * x + y * y + z * z
+    return self if n2 <= 0
+    self * (1 / Math.sqrt(n2))
   end
 
   def saturate
