@@ -34,7 +34,7 @@ class ImageExporter
     png = ChunkyPNG::Image.new(height, width, ChunkyPNG::Color::TRANSPARENT)
     @data.each_with_index do |pixel, i|
       pixel = pixel.saturate
-      png[i % width, i / width] = ChunkyPNG::Color.rgb(pixel.x, pixel.y, pixel.z)
+      png[i % width, i / height] = ChunkyPNG::Color.rgb(pixel.x, pixel.y, pixel.z)
     end
     png.save("#{file_name}.png", :fast_rgba)
   end

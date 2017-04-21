@@ -6,12 +6,12 @@ end
 class World
   attr_reader :objects, :lights, :height, :width, :image
 
-  def initialize(h, w)
+  def initialize(h = 100, w = 100)
     @height = h
     @width = w
     @objects = []
     @lights = []
-    @image = ImageExporter.new(h, w)
+    @image = ImageExporter.new(height, width)
   end
 
   def add(object)
@@ -119,19 +119,17 @@ class World
     hit_color
   end
 
-  def render_pixel(x, y)
-    ray_x = (2 * (x + 0.5) / width) - 1 # TODO: more rays per pixel
-    ray_y = 1 - 2 * (y + 0.5) / height
-    ray_origin = Vec3d.new(0, 0, 0)
-    hit_color = cast_ray(Ray.new(ray_origin, Vec3d.new(ray_x, ray_y, 1)))
-    hit_color **= 1 / 3.2
-    image.set(x, y, hit_color)
-  end
-
-  def render
-    (0..width - 1).each do |x|
-      (0..height - 1).each do |y|
-        render_pixel(x, y)
+  def render(fov = 90)
+    scale = Math.tan(fov * 0.5 * Math::PI / 180)
+    image_aspect_ratio = width / height.to_f
+    (0..width - 1).each do |i|
+      (0..height - 1).each do |j|
+        ray_x = (2 * (i + 0.5) / width.to_f - 1) * image_aspect_ratio * scale # TODO: more rays per pixel
+        ray_y = (1 - 2 * (j + 0.5) / height.to_f) * scale
+        ray_origin = Vec3d.new(0, 0, 0)
+        hit_color = cast_ray(Ray.new(ray_origin, Vec3d.new(ray_x, ray_y, 1)))
+        hit_color **= 1 / 2.2
+        image.set(i, j, hit_color)
       end
     end
   end
