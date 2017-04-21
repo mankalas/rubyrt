@@ -77,13 +77,14 @@ class World
     end
     eta = eta_i / eta_t
     k = 1 - eta * eta * (1 - cos_i * cos_i)
-    k < 0 ? Vec3d.new(0, 0, 0) : ray_direction * eta + normal * (eta * cos_i - Math.sqrt(k))
+    return Vec3d.new(0, 0, 0) if k < 0
+    ray_direction * eta + normal * (eta * cos_i - Math.sqrt(k))
   end
 
-  def cast_ray(ray, depth = 0, bias = 0.5)
-    hit_color = Color::BLACK
+  def cast_ray(ray, depth = 0, max_depth = 5, bias = 0.00001)
+    hit_color = Color.new(0.235294, 0.67451, 0.843137)
 
-    return hit_color if depth > 3
+    return hit_color if depth > max_depth
 
     object_intersection = first_intersection(ray)
     return hit_color if object_intersection.nil?
@@ -92,6 +93,7 @@ class World
     hit_point = object_intersection.point
     normal = object_intersection.normal
     case hit_object.material_type
+
     when :reflection_and_refraction
       reflection_direction = reflect(ray.direction, normal).normalize
       refraction_direction = refract(ray.direction, normal, hit_object.refractive_index).normalize
@@ -106,14 +108,24 @@ class World
       reflection_color = cast_ray(Ray.new(reflection_ray_origin, reflection_direction), depth + 1)
       refraction_color = cast_ray(Ray.new(refraction_ray_origin, refraction_direction), depth + 1)
       kr = fresnel(ray.direction, normal, hit_object.refractive_index)
-      hit_color = reflection_color * kr + refraction_color * (1 - kr)
+      hit_color = (reflection_color * kr +
+                   refraction_color * (1 - kr) * hit_object.transparency) * hit_object.color
+
+    # when :reflection
+    #   kr = fresnel(ray.direction, normal, hit_object.refractive_index)
+    #   reflection_direction = reflect(ray.direction, normal)
+    #   reflection_ray_origin = reflection_direction.dot(normal) < 0 ?
+    #                             hit_point - normal * bias :
+    #                             hit_point + normal * bias
+    #   hit_color = cast_ray(Ray.new(reflection_ray_origin, reflection_direction), depth + 1) * kr
+
     else
       lights.each do |light_point|
         light_intersection = light_first_intersection(light_point, object_intersection)
         next unless can_see_intersection?(light_intersection, object_intersection)
         light = light_point.lighting(light_intersection, Vec3d.new(ray.direction.x, ray.direction.y, 1), object_intersection.normal)
         next unless light
-        hit_color += object_intersection.object.color * (light.diffuse + light.specular)
+        hit_color = object_intersection.object.color * (light.diffuse * hit_object.kd + light.specular * hit_object.ks)
       end
     end
     hit_color
