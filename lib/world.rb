@@ -55,43 +55,23 @@ class World
     hit = first_intersection(ray)
     return hit_color if hit.nil?
 
-    hit_object = hit.object
-    hit_point = hit.point
-    normal = hit.normal
-    case hit_object.material_type
-
-    when :reflection_and_refraction
-      reflection_direction = ray.reflect(normal)
-      refraction_direction = rayrefract(normal, hit_object.refractive_index)
-
-      reflection_ray_origin = reflection_direction.dot(normal) < 0 ?
-                                hit_point - normal * bias :
-                                hit_point + normal * bias
-      refraction_ray_origin = refraction_direction.dot(normal) < 0 ?
-                                hit_point - normal * bias :
-                                hit_point + normal * bias
-
-      reflection_color = cast_ray(Ray.new(reflection_ray_origin, reflection_direction), depth + 1)
-      refraction_color = cast_ray(Ray.new(refraction_ray_origin, refraction_direction), depth + 1)
-      kr = ray.fresnel(normal, hit_object.refractive_index)
-      hit_color = (reflection_color * kr +
-                   refraction_color * (1 - kr) * hit_object.transparency) * hit_object.color
-
-    # when :reflection
-    #   kr = fresnel(ray.direction, normal, hit_object.refractive_index)
-    #   reflection_direction = reflect(ray.direction, normal)
-    #   reflection_ray_origin = reflection_direction.dot(normal) < 0 ?
-    #                             hit_point - normal * bias :
-    #                             hit_point + normal * bias
-    #   hit_color = cast_ray(Ray.new(reflection_ray_origin, reflection_direction), depth + 1) * kr
-
+    if hit.object.transparency > 0 || hit.object.reflection > 0
+      kr = ray.fresnel(hit.normal, hit.object.refractive_index)
+      reflection_direction = ray.reflect(hit.normal)
+      hit_color = cast_ray(Ray.new(hit.point + hit.normal, reflection_direction), depth + 1) * kr
+      if hit.object.transparency > 0
+        refraction_direction = ray.refract(hit.normal, hit.object.refractive_index)
+        refraction_color = cast_ray(Ray.new(hit.point + hit.normal, refraction_direction), depth + 1)
+        hit_color += refraction_color * (1 - kr) * hit.object.transparency
+      end
+      hit_color *= hit.object.color
     else
       lights.each do |light_point|
         light_intersection = light_first_intersection(light_point, hit)
         next unless can_see_intersection?(light_intersection, hit)
         light = light_point.lighting(light_intersection, Vec3d.new(ray.direction.x, ray.direction.y, 1), hit.normal)
         next unless light
-        hit_color = hit.object.color * (light.diffuse * hit_object.kd + light.specular * hit_object.ks)
+        hit_color = hit.object.color * (light.diffuse * hit.object.kd + light.specular * hit.object.ks)
       end
     end
     hit_color

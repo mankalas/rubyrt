@@ -57,7 +57,7 @@ class Ray
   end
 
   def reflect(normal)
-    (direction - normal * direction.dot(normal) * 2).normalize
+    direction - normal * direction.dot(normal) * 2
   end
 
   def refract(normal, refractive_index)

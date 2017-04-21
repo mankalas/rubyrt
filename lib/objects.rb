@@ -1,23 +1,23 @@
 require 'color'
 
 class AbstractObject
-  attr_accessor :color, :material_type, :refractive_index, :specular_hardness, :ks, :kd, :centre, :transparency
+  attr_accessor :color, :refractive_index, :specular_hardness, :ks, :kd, :centre, :transparency, :reflection
   EPS = 1e-6
 
   def initialize(centre,
                  color: Color::WHITE,
-                 material_type: nil,
                  refractive_index: 1.3,
                  specular_hardness: 25,
                  transparency: 0,
+                 reflection: 0,
                  kd: 0.8,
                  ks: 0.2)
     @centre = centre
     @color = color
-    @material_type = material_type
     @refractive_index = refractive_index
     @specular_hardness = specular_hardness
     @transparency = transparency
+    @reflection = reflection
     @kd = kd
     @ks = ks
   end
