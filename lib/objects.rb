@@ -55,7 +55,7 @@ class Sphere < AbstractObject
 
   class Intersection < AbstractIntersection
     def normal
-      (object.centre - point).normalize
+      (point - object.centre).normalize
     end
   end
 
