@@ -12,6 +12,8 @@ class World
     @objects = []
     @lights = []
     @image = ImageExporter.new(height, width)
+    @bias = 0.00001
+    @max_depth = 5
   end
 
   def add(object)
@@ -49,24 +51,35 @@ class World
 
   def cast_reflection_ray(ray, hit, kr, depth)
     reflection_direction = ray.reflect(hit.normal)
-    cast_ray(Ray.new(hit.point + hit.normal, reflection_direction), depth + 1) * kr
+    reflection_ray = Ray.new(hit.point + hit.normal * @bias, reflection_direction)
+    cast_ray(reflection_ray, depth + 1) * kr * hit.object.reflection
   end
 
   def cast_refraction_ray(ray, hit, kr, depth)
-    refraction_direction = ray.refract(hit.normal, hit.object.refractive_index)
-    refraction_color = cast_ray(Ray.new(hit.point + hit.normal, refraction_direction), depth + 1)
+    eta = @inside ? hit.object.refractive_index : 1 / hit.object.refractive_index
+    cos_i = -hit.normal.dot(ray.direction)
+    k = 1 - eta * eta * (1 - cos_i * cos_i)
+    refraction_direction = (ray.direction * eta + hit.normal * (eta * cos_i - Math.sqrt(k))).normalize
+    refraction_ray = Ray.new(hit.point - hit.normal * @bias, refraction_direction)
+    refraction_color = cast_ray(refraction_ray, depth + 1)
     refraction_color * (1 - kr) * hit.object.transparency
   end
 
-  def cast_ray(ray, depth = 0, max_depth = 5, bias = 0.00001)
+  def cast_ray(ray, depth = 0)
     hit_color = Color::SKY
 
-    return hit_color if depth > max_depth
+    return hit_color if depth > @max_depth
 
     hit = first_intersection(ray)
     return hit_color if hit.nil?
 
     if hit.object.transparency > 0 || hit.object.reflection > 0
+      @inside = false
+      if ray.direction.dot(hit.normal) > 0
+        @inside = true
+        hit.normal *= -1
+      end
+
       kr = ray.fresnel(hit.normal, hit.object.refractive_index)
       hit_color = cast_reflection_ray(ray, hit, kr, depth)
       hit_color += cast_refraction_ray(ray, hit, kr, depth) if hit.object.transparency > 0
@@ -77,7 +90,7 @@ class World
         next unless can_see_intersection?(light_intersection, hit)
         light = light_point.lighting(light_intersection, Vec3d.new(ray.direction.x, ray.direction.y, 1), hit.normal)
         next unless light
-        hit_color = hit.object.color * (light.diffuse * hit.object.kd + light.specular * hit.object.ks)
+        hit_color = hit.object.color * (light.diffuse  + light.specular )
       end
     end
     hit_color

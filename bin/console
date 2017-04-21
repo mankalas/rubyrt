@@ -33,18 +33,26 @@ w = World.new(options[:width], options[:height])
 dif_pow = 20
 spe_pow = 24
 
-s1 = Sphere.new(Vec3d.new(-1, 0, 12), 4)
+s1 = Sphere.new(Vec3d.new(-1, -1, 12), 4)
 s1.color = Color::GREEN
 s1.reflection = 1
 
 s2 = Sphere.new(Vec3d.new(0.5, -0.5, 4), 1)
-s2.refractive_index = 1.5
+s2.refractive_index = 3.14
 s2.transparency = 0.5
-s2.reflection = 0
+s2.reflection = 1
 s2.color = Color::RED
 
-p1 = Plane.new(Vec3d.new(0, -4, 0), Vec3d.new(0, -1, 0))
-p1.color = Color::YELLOW
+s3 = Sphere.new(Vec3d.new(-2.5, 1, 6), 1.5)
+s3.color = Color::BLUE
+s3.reflection = 0.001
+s3.transparency = 1
+
+p1 = Plane.new(Vec3d.new(0, -5, 0), Vec3d.new(0, -1, 0))
+p1.color = Color::WHITE
+
+p2 = Plane.new(Vec3d.new(0, 8, 0), Vec3d.new(0, 1, 0))
+p2.color = Color::WHITE
 
 [
   # PointLight.new(Vec3d.new(-10, 10, -1), Color::GREEN, dif_pow, Color::GREEN, spe_pow),
@@ -57,10 +65,9 @@ p1.color = Color::YELLOW
 
   # Plane.new(Vec3d.new(0, 0, -15), Vec3d.new(0, 0, -1), Color.new(1, 1, 0)),
 
-  s1, s2,
-#  p1,
-  PointLight.new(Vec3d.new(-2, 7, 2), Color::WHITE, 35, Color::WHITE, 35),
-  PointLight.new(Vec3d.new(3, 5, -1.2), Color::WHITE, 31, Color::WHITE, 31),
+  s1, s2,# s3,
+  p1, p2,
+  PointLight.new(Vec3d.new(0.75, -6, 8), Color::WHITE, 35, Color::WHITE, 35),
 
 ].each { |obj| w.add(obj) }
 
