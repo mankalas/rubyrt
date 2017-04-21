@@ -22,8 +22,9 @@ class PointLight
     ndotL = normal.dot(light_direction).abs
     h = (light_direction + view_direction).normalize
     ndotH = [normal.dot(h), 0].max
+    specular_hardness = intersection.object.specular_hardness
     Light.new(diffuse_factoring(ndotL, intersection.distance2),
-              specular_factoring(ndotH, intersection.distance2))
+              specular_factoring(ndotH**specular_hardness, intersection.distance2))
   end
 
   def diffuse_factoring(intensity, d2)
